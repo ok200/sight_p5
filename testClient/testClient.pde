@@ -5,7 +5,9 @@ import netP5.*;
 int videoWidth = 320;
 int videoHeight = 240;
 
-int life = 3;
+int life = 2;
+
+int[] synthCount = new int[15];
 
 // variables
 OscP5 oscP5;
@@ -119,7 +121,7 @@ int select_timbre(Feature f) {
   
   if (s < 0.05) { // 1
     return 0;
-  } else if (s < 0.3) { // 6
+  } else if (s < 0.2) { // 6
     return (int)(1 + (h / 60));
   } else { // 8
     return (int)(7 + (h / 45));
@@ -137,18 +139,23 @@ void synthesize() {
       msg.add(1); //ノードID
     
       msg.add("pan");
-      msg.add((f.x/videoWidth)*2-1);
+      float x = (f.x/videoWidth)*2-1;
+      msg.add(x * x * x);
       msg.add("amp");
-      msg.add(f.significance / 64);
+      msg.add(pow(f.significance / 64, 2));
       for (int i=1; i<=6; i++) {
         msg.add("p"+i);
         msg.add(f.vector[i-1]);
       }
       
       oscP5.send(msg, remote);
-      println("synth " + select_timbre(f) + " (" + f.r + ", " + f.g + ", " + f.b + ")");
+//      println("synth " + select_timbre(f) + " (" + f.r + ", " + f.g + ", " + f.b + ")");
+      synthCount[select_timbre(f)]++;
     }
     f.count++;
+  }
+  for (int i=0; i<15; i++) {
+    println("synth" + i + "\t" + synthCount[i]);
   }
 }
 
